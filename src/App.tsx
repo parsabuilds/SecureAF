@@ -3,7 +3,6 @@ import { LandingPage } from './components/LandingPage';
 import { AnalysisProgress } from './components/AnalysisProgress';
 import { ResultsDashboard } from './components/ResultsDashboard';
 import { analysisService } from './services/analysisService';
-import { githubService } from './services/githubService';
 import type { AnalysisResult } from './types';
 
 type AppState = 'landing' | 'analyzing' | 'results' | 'error';
@@ -13,41 +12,6 @@ function App() {
   const [repoUrl, setRepoUrl] = useState('');
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    githubService.loadFromStorage();
-
-    const path = window.location.pathname;
-    const searchParams = new URLSearchParams(window.location.search);
-
-    if (path === '/github/callback') {
-      const code = searchParams.get('code');
-      const state = searchParams.get('state');
-
-      if (code && state) {
-        githubService.handleCallback(code, state)
-          .then(() => {
-            if (window.opener) {
-              window.close();
-            } else {
-              window.history.replaceState({}, '', '/');
-              alert('Successfully connected to GitHub!');
-            }
-          })
-          .catch((err) => {
-            console.error('GitHub OAuth error:', err);
-            if (window.opener) {
-              window.close();
-            } else {
-              window.history.replaceState({}, '', '/');
-              alert('Failed to connect to GitHub. Please try again.');
-            }
-          });
-      } else {
-        window.history.replaceState({}, '', '/');
-      }
-    }
-  }, []);
 
   const handleAnalyze = async (url: string) => {
     setRepoUrl(url);

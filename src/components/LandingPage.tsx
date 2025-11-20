@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Lock, Zap, CheckCircle } from 'lucide-react';
+import { Shield, Github, Lock, Zap, CheckCircle } from 'lucide-react';
 import { ParticleAnimation } from './ParticleAnimation';
 
 interface LandingPageProps {
@@ -41,6 +41,10 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               SecureAF.dev
             </span>
           </div>
+          <button className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium opacity-50 cursor-not-allowed">
+            <Github className="w-5 h-5 inline mr-2" />
+            Connect GitHub (Coming Soon)
+          </button>
         </nav>
 
         <main className="container mx-auto px-6 py-20">

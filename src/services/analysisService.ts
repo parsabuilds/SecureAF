@@ -55,7 +55,7 @@ export class AnalysisService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        if (response.status === 403 && errorData.message?.includes('rate limit')) {
+        if (response.status === 403) {
           throw new Error('GitHub API rate limit exceeded. Please try again in a few minutes.');
         }
         if (response.status === 404) {
@@ -131,7 +131,7 @@ export class AnalysisService {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          if (response.status === 403 && errorData.message?.includes('rate limit')) {
+          if (response.status === 403) {
             throw new Error('GitHub API rate limit exceeded. Please try again later.');
           }
           throw new Error('Failed to fetch repository tree. The repository may be empty or private.');
