@@ -413,15 +413,27 @@ export class AnalysisService {
     medium: number,
     low: number
   ): number {
-    const weights = { critical: 40, high: 35, medium: 20, low: 5 };
-    const penalty =
-      critical * weights.critical +
-      high * weights.high +
-      medium * weights.medium +
-      low * weights.low;
+    let score = 100;
 
-    const score = Math.max(0, 100 - penalty);
-    return Math.round(score);
+    if (critical > 0) {
+      score -= 25 * Math.log2(critical + 1);
+    }
+
+    if (high > 0) {
+      score -= 15 * Math.log2(high + 1);
+    }
+
+    if (medium > 0) {
+      const mediumPenalty = Math.min(20, 8 * Math.log2(medium + 1));
+      score -= mediumPenalty;
+    }
+
+    if (low > 0) {
+      const lowPenalty = Math.min(10, 4 * Math.log2(low + 1));
+      score -= lowPenalty;
+    }
+
+    return Math.max(0, Math.round(score));
   }
 }
 
