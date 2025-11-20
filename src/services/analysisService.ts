@@ -46,18 +46,31 @@ export class AnalysisService {
   }
 
   private async fetchRepoMetadata(owner: string, repo: string) {
-    const response = await fetch(`${GITHUB_API}/repos/${owner}/${repo}`, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'SecureAF-Analyzer',
-      },
-    });
+    try {
+      const response = await fetch(`${GITHUB_API}/repos/${owner}/${repo}`, {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch repository: ${response.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 403) {
+          throw new Error('GitHub API rate limit exceeded. Please try again in a few minutes.');
+        }
+        if (response.status === 404) {
+          throw new Error('Repository not found. Please check the URL.');
+        }
+        throw new Error(`Failed to fetch repository: ${errorData.message || response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error. Please check your connection and try again.');
     }
-
-    return await response.json();
   }
 
   private async fetchRepoContents(owner: string, repo: string): Promise<RepoFile[]> {
@@ -74,7 +87,6 @@ export class AnalysisService {
             {
               headers: {
                 'Accept': 'application/vnd.github.v3+json',
-                'User-Agent': 'SecureAF-Analyzer',
               },
             }
           );
@@ -97,34 +109,43 @@ export class AnalysisService {
   }
 
   private async fetchRepoTree(owner: string, repo: string) {
-    let response = await fetch(
-      `${GITHUB_API}/repos/${owner}/${repo}/git/trees/main?recursive=1`,
-      {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'SecureAF-Analyzer',
-        },
-      }
-    );
-
-    if (!response.ok) {
-      response = await fetch(
-        `${GITHUB_API}/repos/${owner}/${repo}/git/trees/master?recursive=1`,
+    try {
+      let response = await fetch(
+        `${GITHUB_API}/repos/${owner}/${repo}/git/trees/main?recursive=1`,
         {
           headers: {
             'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'SecureAF-Analyzer',
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch repository tree');
-      }
-    }
+        response = await fetch(
+          `${GITHUB_API}/repos/${owner}/${repo}/git/trees/master?recursive=1`,
+          {
+            headers: {
+              'Accept': 'application/vnd.github.v3+json',
+            },
+          }
+        );
 
-    const data = await response.json();
-    return data.tree || [];
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          if (response.status === 403) {
+            throw new Error('GitHub API rate limit exceeded. Please try again later.');
+          }
+          throw new Error('Failed to fetch repository tree. The repository may be empty or private.');
+        }
+      }
+
+      const data = await response.json();
+      return data.tree || [];
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error while fetching repository contents.');
+    }
   }
 
   private isSecurityRelevantFile(path: string): boolean {
