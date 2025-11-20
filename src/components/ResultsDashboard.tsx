@@ -9,8 +9,10 @@ import {
   ChevronUp,
   FileCode,
   Home,
-  GitPullRequest
+  GitPullRequest,
+  Sparkles
 } from 'lucide-react';
+import { PRGenerationModal } from './PRGenerationModal';
 import type { AnalysisResult, SecurityIssue, IssueSeverity } from '../types';
 
 interface ResultsDashboardProps {
@@ -56,6 +58,8 @@ const severityConfig = {
 export function ResultsDashboard({ result, onBack }: ResultsDashboardProps) {
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
   const [selectedSeverity, setSelectedSeverity] = useState<IssueSeverity | 'all'>('all');
+  const [prModalOpen, setPrModalOpen] = useState(false);
+  const [selectedIssue, setSelectedIssue] = useState<SecurityIssue | null>(null);
 
   const toggleIssue = (issueId: string) => {
     setExpandedIssues((prev) => {
@@ -105,9 +109,21 @@ export function ResultsDashboard({ result, onBack }: ResultsDashboardProps) {
               <p className="text-sm text-gray-500">{result.repoOwner}</p>
             </div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg cursor-not-allowed opacity-50">
-            <GitPullRequest className="w-4 h-4" />
-            Generate Fix PR (Coming Soon)
+          <button
+            onClick={() => {
+              const criticalOrHighIssues = result.issues.filter(
+                (i) => (i.severity === 'critical' || i.severity === 'high') && i.filePath
+              );
+              if (criticalOrHighIssues.length > 0) {
+                setSelectedIssue(criticalOrHighIssues[0]);
+                setPrModalOpen(true);
+              }
+            }}
+            disabled={!result.issues.some((i) => (i.severity === 'critical' || i.severity === 'high') && i.filePath)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-blue-600 disabled:hover:to-indigo-600"
+          >
+            <Sparkles className="w-4 h-4" />
+            Generate Fix PR
           </button>
         </div>
       </nav>
@@ -301,6 +317,21 @@ export function ResultsDashboard({ result, onBack }: ResultsDashboardProps) {
                         </h4>
                         <p className={`${config.text} leading-relaxed`}>{issue.recommendation}</p>
                       </div>
+
+                      {(issue.severity === 'critical' || issue.severity === 'high') && issue.filePath && (
+                        <div className="pt-4">
+                          <button
+                            onClick={() => {
+                              setSelectedIssue(issue);
+                              setPrModalOpen(true);
+                            }}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl font-medium"
+                          >
+                            <Sparkles className="w-5 h-5" />
+                            Generate AI-Powered Fix PR
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -309,6 +340,19 @@ export function ResultsDashboard({ result, onBack }: ResultsDashboardProps) {
           </div>
         )}
       </div>
+
+      {selectedIssue && (
+        <PRGenerationModal
+          isOpen={prModalOpen}
+          onClose={() => {
+            setPrModalOpen(false);
+            setSelectedIssue(null);
+          }}
+          issue={selectedIssue}
+          repoOwner={result.repoOwner}
+          repoName={result.repoName}
+        />
+      )}
     </div>
   );
 }
