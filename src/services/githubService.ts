@@ -19,6 +19,10 @@ class GitHubService {
   private accessToken: string | null = null;
   private user: GitHubUser | null = null;
 
+  constructor() {
+    this.loadFromStorage();
+  }
+
   initiateOAuth(): void {
     const redirectUri = `${window.location.origin}/github/callback`;
     const scope = 'repo';

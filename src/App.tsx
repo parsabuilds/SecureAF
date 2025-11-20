@@ -3,6 +3,7 @@ import { LandingPage } from './components/LandingPage';
 import { AnalysisProgress } from './components/AnalysisProgress';
 import { ResultsDashboard } from './components/ResultsDashboard';
 import { analysisService } from './services/analysisService';
+import { githubService } from './services/githubService';
 import type { AnalysisResult } from './types';
 
 type AppState = 'landing' | 'analyzing' | 'results' | 'error';
@@ -12,6 +13,33 @@ function App() {
   const [repoUrl, setRepoUrl] = useState('');
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const path = window.location.pathname;
+
+    if (path === '/github/callback' && code && state) {
+      handleGitHubCallback(code, state);
+    }
+  }, []);
+
+  const handleGitHubCallback = async (code: string, state: string) => {
+    try {
+      await githubService.handleCallback(code, state);
+      window.history.replaceState({}, document.title, '/');
+      window.location.href = '/';
+    } catch (err) {
+      console.error('GitHub OAuth error:', err);
+      setError(err instanceof Error ? err.message : 'GitHub authentication failed');
+      setState('error');
+      setTimeout(() => {
+        setState('landing');
+        window.history.replaceState({}, document.title, '/');
+      }, 3000);
+    }
+  };
 
   const handleAnalyze = async (url: string) => {
     setRepoUrl(url);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Shield, Github, Lock, Zap, CheckCircle } from 'lucide-react';
 import { ParticleAnimation } from './ParticleAnimation';
+import { githubService } from '../services/githubService';
 
 interface LandingPageProps {
   onAnalyze: (repoUrl: string) => void;
@@ -9,12 +10,17 @@ interface LandingPageProps {
 export function LandingPage({ onAnalyze }: LandingPageProps) {
   const [repoUrl, setRepoUrl] = useState('');
   const [isHovered, setIsHovered] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(githubService.isAuthenticated());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (repoUrl.trim()) {
       onAnalyze(repoUrl.trim());
     }
+  };
+
+  const handleGitHubConnect = () => {
+    githubService.initiateOAuth();
   };
 
   const exampleRepos = [
@@ -41,10 +47,28 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               SecureAF.dev
             </span>
           </div>
-          <button className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium opacity-50 cursor-not-allowed">
-            <Github className="w-5 h-5 inline mr-2" />
-            Connect GitHub (Coming Soon)
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600">Connected as {githubService.getUser()?.login}</span>
+              <button
+                onClick={() => {
+                  githubService.logout();
+                  setIsAuthenticated(false);
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleGitHubConnect}
+              className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium hover:bg-gray-100 rounded-lg"
+            >
+              <Github className="w-5 h-5 inline mr-2" />
+              Connect GitHub
+            </button>
+          )}
         </nav>
 
         <main className="container mx-auto px-6 py-20">
