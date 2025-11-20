@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .stop-green-500 {
+    stop-color: rgb(34, 197, 94);
+  }
+
+  .stop-emerald-500 {
+    stop-color: rgb(16, 185, 129);
+  }
+
+  .stop-yellow-500 {
+    stop-color: rgb(234, 179, 8);
+  }
+
+  .stop-orange-500 {
+    stop-color: rgb(249, 115, 22);
+  }
+
+  .stop-orange-600 {
+    stop-color: rgb(234, 88, 12);
+  }
+
+  .stop-red-500 {
+    stop-color: rgb(239, 68, 68);
+  }
+}
