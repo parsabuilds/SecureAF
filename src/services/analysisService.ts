@@ -49,7 +49,7 @@ export class AnalysisService {
     const response = await fetch(`${GITHUB_API}/repos/${owner}/${repo}`, {
       headers: {
         'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'SecureCode-Analyzer',
+        'User-Agent': 'SecureAF-Analyzer',
       },
     });
 
@@ -74,7 +74,7 @@ export class AnalysisService {
             {
               headers: {
                 'Accept': 'application/vnd.github.v3+json',
-                'User-Agent': 'SecureCode-Analyzer',
+                'User-Agent': 'SecureAF-Analyzer',
               },
             }
           );
@@ -102,7 +102,7 @@ export class AnalysisService {
       {
         headers: {
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'SecureCode-Analyzer',
+          'User-Agent': 'SecureAF-Analyzer',
         },
       }
     );
@@ -113,7 +113,7 @@ export class AnalysisService {
         {
           headers: {
             'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'SecureCode-Analyzer',
+            'User-Agent': 'SecureAF-Analyzer',
           },
         }
       );

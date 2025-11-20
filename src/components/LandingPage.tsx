@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, Github, Lock, Zap, CheckCircle } from 'lucide-react';
+import { ParticleAnimation } from './ParticleAnimation';
 
 interface LandingPageProps {
   onAnalyze: (repoUrl: string) => void;
@@ -18,12 +19,13 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
 
   const exampleRepos = [
     'https://github.com/facebook/react',
-    'https://github.com/vercel/next.js',
+    'https://github.com/expressjs/express',
     'https://github.com/nodejs/node',
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
+      <ParticleAnimation />
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-indigo-100/30 to-transparent rounded-full blur-3xl animate-pulse delay-1000" />
@@ -36,7 +38,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               <Shield className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              SecureCode
+              SecureAF.dev
             </span>
           </div>
           <button className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium opacity-50 cursor-not-allowed">
