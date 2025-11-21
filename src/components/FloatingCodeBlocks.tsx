@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface CodeBlock {
   id: number;
@@ -88,7 +88,7 @@ export function FloatingCodeBlocks({ mousePosition }: FloatingCodeBlocksProps) {
         return (
           <div
             key={block.id}
-            className="absolute animate-float opacity-0"
+            className="absolute animate-float"
             style={{
               left: `${block.x}%`,
               top: `${block.y}%`,
@@ -105,46 +105,46 @@ export function FloatingCodeBlocks({ mousePosition }: FloatingCodeBlocksProps) {
                   : 'border-red-300'
               }`}
             >
-            <div className="absolute -top-3 -right-3 z-10">
-              {block.fixed ? (
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-scale-in">
-                  <CheckCircle className="w-5 h-5 text-white" />
-                </div>
-              ) : (
-                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
-                  <AlertTriangle className="w-5 h-5 text-white" />
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 min-w-[280px]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                </div>
-                <span
-                  className={`text-xs font-bold ${
-                    block.fixed ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {block.vulnerability}
-                </span>
+              <div className="absolute -top-3 -right-3 z-10">
+                {block.fixed ? (
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-scale-in">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
+                    <AlertTriangle className="w-5 h-5 text-white" />
+                  </div>
+                )}
               </div>
-              <pre className="text-xs font-mono text-gray-800 bg-gray-100 p-2 rounded overflow-hidden">
-                <code className={block.fixed ? 'line-through opacity-50' : ''}>
-                  {block.code}
-                </code>
-              </pre>
-              {block.fixed && (
-                <div className="mt-2 text-xs text-green-600 font-medium animate-fade-in">
-                  Fixed
+
+              <div className="p-4 min-w-[280px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  </div>
+                  <span
+                    className={`text-xs font-bold ${
+                      block.fixed ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {block.vulnerability}
+                  </span>
                 </div>
-              )}
+                <pre className="text-xs font-mono text-gray-800 bg-gray-100 p-2 rounded overflow-hidden">
+                  <code className={block.fixed ? 'line-through opacity-50' : ''}>
+                    {block.code}
+                  </code>
+                </pre>
+                {block.fixed && (
+                  <div className="mt-2 text-xs text-green-600 font-medium animate-fade-in">
+                    Fixed
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
         );
       })}
     </div>
