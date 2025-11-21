@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Github, Lock, Zap, CheckCircle } from 'lucide-react';
 import { ParticleAnimation } from './ParticleAnimation';
+import { RepositorySelector } from './RepositorySelector';
+import { githubService } from '../services/githubService';
 
 interface LandingPageProps {
   onAnalyze: (repoUrl: string) => void;
@@ -9,12 +11,21 @@ interface LandingPageProps {
 export function LandingPage({ onAnalyze }: LandingPageProps) {
   const [repoUrl, setRepoUrl] = useState('');
   const [isHovered, setIsHovered] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(githubService.isAuthenticated());
+
+  useEffect(() => {
+    setIsAuthenticated(githubService.isAuthenticated());
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (repoUrl.trim()) {
       onAnalyze(repoUrl.trim());
     }
+  };
+
+  const handleGitHubConnect = () => {
+    githubService.initiateOAuth();
   };
 
   const exampleRepos = [
@@ -41,10 +52,28 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               SecureAF.dev
             </span>
           </div>
-          <button className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium opacity-50 cursor-not-allowed">
-            <Github className="w-5 h-5 inline mr-2" />
-            Connect GitHub (Coming Soon)
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600">Connected as {githubService.getUser()?.login}</span>
+              <button
+                onClick={() => {
+                  githubService.logout();
+                  setIsAuthenticated(false);
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleGitHubConnect}
+              className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium hover:bg-gray-100 rounded-lg"
+            >
+              <Github className="w-5 h-5 inline mr-2" />
+              Connect GitHub
+            </button>
+          )}
         </nav>
 
         <main className="container mx-auto px-6 py-20">
@@ -65,6 +94,13 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               Catch vulnerabilities before they reach production.
             </p>
 
+            {isAuthenticated && (
+              <div className="mb-6 flex items-center justify-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-xl max-w-3xl mx-auto">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span className="text-green-700 font-medium">Access to private repositories enabled</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="mb-8">
               <div className="relative max-w-3xl mx-auto">
                 <div
@@ -80,7 +116,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
                     onChange={(e) => setRepoUrl(e.target.value)}
                     onFocus={() => setIsHovered(true)}
                     onBlur={() => setIsHovered(false)}
-                    placeholder="Enter GitHub repository URL"
+                    placeholder={isAuthenticated ? "Enter any GitHub repository URL" : "Enter public GitHub repository URL"}
                     className="flex-1 px-6 py-6 text-lg outline-none"
                   />
                   <button
@@ -93,8 +129,23 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               </div>
             </form>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500 mb-16">
-              <span>Try an example:</span>
+            {isAuthenticated && (
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gray-300 max-w-xs"></div>
+                <span className="text-gray-500 font-medium">OR</span>
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gray-300 max-w-xs"></div>
+              </div>
+            )}
+
+            {isAuthenticated && (
+              <div className="flex justify-center mb-8">
+                <RepositorySelector onSelect={(url) => setRepoUrl(url)} />
+              </div>
+            )}
+
+            {!isAuthenticated && (
+              <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500 mb-16">
+                <span>Try an example:</span>
               {exampleRepos.map((url) => (
                 <button
                   key={url}
@@ -104,7 +155,8 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
                   {url.split('/').slice(-1)[0]}
                 </button>
               ))}
-            </div>
+              </div>
+            )}
 
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mt-20">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">

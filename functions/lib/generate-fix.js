@@ -1,0 +1,172 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.generateFix = void 0;
+const https_1 = require("firebase-functions/v2/https");
+const params_1 = require("firebase-functions/params");
+const claudeApiKey = (0, params_1.defineSecret)('CLAUDE_API_KEY');
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+exports.generateFix = (0, https_1.onRequest)({
+    secrets: [claudeApiKey],
+    timeoutSeconds: 300,
+    memory: '512MiB',
+    cors: true
+}, async (req, res) => {
+    if (req.method === 'OPTIONS') {
+        res.set(corsHeaders);
+        res.status(204).send('');
+        return;
+    }
+    res.set(corsHeaders);
+    try {
+        if (req.method !== 'POST') {
+            res.status(405).json({ error: 'Method not allowed' });
+            return;
+        }
+        const { issue, fileContent, repoContext } = req.body;
+        if (!issue || !fileContent) {
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
+        }
+        const apiKey = claudeApiKey.value();
+        if (!apiKey) {
+            throw new Error('Claude API key not configured');
+        }
+        const systemInstructions = `You are an expert security engineer specializing in fixing security vulnerabilities in code. Your task is to analyze security issues and provide precise, production-ready fixes.
+
+CRITICAL RULES:
+1. ONLY modify code related to the security issue
+2. Maintain all existing functionality
+3. Preserve code style and formatting
+4. DO NOT add unnecessary comments unless explaining security-critical changes
+5. Ensure the fix doesn't introduce new vulnerabilities
+6. Return ONLY valid, compilable code
+
+SECURITY ANALYSIS CHECKLIST:
+- Input Validation: Check if user inputs are properly sanitized
+- Authentication/Authorization: Verify access controls are correct
+- SQL Injection: Ensure queries use parameterized statements
+- XSS Protection: Check for proper output encoding
+- Secrets Management: Verify no hardcoded credentials
+- Dependency Security: Check for known vulnerable packages
+- CORS Configuration: Ensure proper origin restrictions
+- Error Handling: No sensitive data in error messages
+- Crypto: Use strong, modern algorithms
+- API Security: Proper rate limiting and authentication
+
+You must respond with a JSON object containing:
+{
+  "fixed_content": "The complete fixed file content",
+  "explanation": "A clear explanation of what was fixed and why",
+  "confidence": 0.0-1.0 (your confidence in the fix),
+  "changes_summary": ["List of specific changes made"]
+}`;
+        const fullPrompt = `${systemInstructions}
+
+SECURITY ISSUE:
+- Severity: ${issue.severity}
+- Category: ${issue.category}
+- Title: ${issue.title}
+- Description: ${issue.description}
+- Recommendation: ${issue.recommendation}
+${issue.lineNumber ? `- Line Number: ${issue.lineNumber}` : ''}
+
+${repoContext ? `
+REPOSITORY CONTEXT:
+- Name: ${repoContext.name}
+- Language: ${repoContext.language}
+${repoContext.framework ? `- Framework: ${repoContext.framework}` : ''}
+` : ''}
+
+FILE TO FIX:
+${issue.filePath ? `Path: ${issue.filePath}` : ''}
+
+\`\`\`
+${fileContent}
+\`\`\`
+
+${issue.codeSnippet ? `
+PROBLEMATIC CODE SNIPPET:
+\`\`\`
+${issue.codeSnippet}
+\`\`\`
+` : ''}
+
+Please analyze this security issue and provide a complete, production-ready fix for the entire file.`;
+        console.log('Calling Claude API with model: claude-sonnet-4-20250514');
+        console.log('API Key present:', !!apiKey);
+        console.log('API Key prefix:', apiKey ? apiKey.substring(0, 15) + '...' : 'none');
+        const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 8000,
+                messages: [
+                    {
+                        role: 'user',
+                        content: fullPrompt,
+                    },
+                ],
+            }),
+        });
+        if (!claudeResponse.ok) {
+            const errorData = await claudeResponse.text();
+            console.error('Claude API error response:', {
+                status: claudeResponse.status,
+                statusText: claudeResponse.statusText,
+                body: errorData,
+                headers: Object.fromEntries(claudeResponse.headers.entries())
+            });
+            throw new Error(`Claude API error: ${claudeResponse.status} ${claudeResponse.statusText} - ${errorData}`);
+        }
+        const claudeData = await claudeResponse.json();
+        const assistantMessage = claudeData.content[0].text;
+        let fixData;
+        try {
+            const jsonMatch = assistantMessage.match(/```json\n([\s\S]*?)\n```/) ||
+                assistantMessage.match(/```\n([\s\S]*?)\n```/) ||
+                assistantMessage.match(/(\{[\s\S]*\})/);
+            if (jsonMatch) {
+                fixData = JSON.parse(jsonMatch[1]);
+            }
+            else {
+                fixData = JSON.parse(assistantMessage);
+            }
+        }
+        catch (parseError) {
+            console.error('Failed to parse Claude response:', assistantMessage);
+            throw new Error('Failed to parse AI response. Please try again.');
+        }
+        if (!fixData.fixed_content || !fixData.explanation) {
+            throw new Error('Invalid fix data from AI');
+        }
+        res.json({
+            success: true,
+            fix: {
+                original_content: fileContent,
+                fixed_content: fixData.fixed_content,
+                explanation: fixData.explanation,
+                confidence: fixData.confidence || 0.8,
+                changes_summary: fixData.changes_summary || [],
+                issue_id: issue.id,
+                file_path: issue.filePath,
+            },
+        });
+    }
+    catch (error) {
+        console.error('Fix generation error:', error);
+        res.status(500).json({
+            error: error.message || 'Failed to generate fix',
+            details: error.stack
+        });
+    }
+});
+//# sourceMappingURL=generate-fix.js.map

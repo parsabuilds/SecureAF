@@ -19,6 +19,10 @@ class GitHubService {
   private accessToken: string | null = null;
   private user: GitHubUser | null = null;
 
+  constructor() {
+    this.loadFromStorage();
+  }
+
   initiateOAuth(): void {
     const redirectUri = `${window.location.origin}/github/callback`;
     const scope = 'repo';
@@ -98,6 +102,25 @@ class GitHubService {
 
   getUser(): GitHubUser | null {
     return this.user;
+  }
+
+  async fetchUserRepositories(): Promise<any[]> {
+    if (!this.accessToken) {
+      throw new Error('Not authenticated with GitHub');
+    }
+
+    const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=100', {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': `Bearer ${this.accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch repositories');
+    }
+
+    return await response.json();
   }
 
   async generateFix(

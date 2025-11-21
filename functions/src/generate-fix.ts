@@ -1,4 +1,7 @@
-import * as functions from 'firebase-functions';
+import { onRequest } from 'firebase-functions/v2/https';
+import { defineSecret } from 'firebase-functions/params';
+
+const claudeApiKey = defineSecret('CLAUDE_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,34 +36,41 @@ interface ClaudeResponse {
   changes_summary: string[];
 }
 
-export const generateFix = functions.https.onRequest(async (req, res) => {
-  if (req.method === 'OPTIONS') {
+export const generateFix = onRequest(
+  {
+    secrets: [claudeApiKey],
+    timeoutSeconds: 300,
+    memory: '512MiB',
+    cors: true
+  },
+  async (req, res) => {
+    if (req.method === 'OPTIONS') {
+      res.set(corsHeaders);
+      res.status(204).send('');
+      return;
+    }
+
     res.set(corsHeaders);
-    res.status(200).send();
-    return;
-  }
 
-  res.set(corsHeaders);
+    try {
+      if (req.method !== 'POST') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+      }
 
-  try {
-    if (req.method !== 'POST') {
-      res.status(405).json({ error: 'Method not allowed' });
-      return;
-    }
+      const { issue, fileContent, repoContext } = req.body as GenerateFixRequest;
 
-    const { issue, fileContent, repoContext } = req.body as GenerateFixRequest;
+      if (!issue || !fileContent) {
+        res.status(400).json({ error: 'Missing required fields' });
+        return;
+      }
 
-    if (!issue || !fileContent) {
-      res.status(400).json({ error: 'Missing required fields' });
-      return;
-    }
+      const apiKey = claudeApiKey.value();
+      if (!apiKey) {
+        throw new Error('Claude API key not configured');
+      }
 
-    const claudeApiKey = functions.config().claude.api_key;
-    if (!claudeApiKey) {
-      throw new Error('Claude API key not configured');
-    }
-
-    const systemPrompt = `You are an expert security engineer specializing in fixing security vulnerabilities in code. Your task is to analyze security issues and provide precise, production-ready fixes.
+      const systemInstructions = `You are an expert security engineer specializing in fixing security vulnerabilities in code. Your task is to analyze security issues and provide precise, production-ready fixes.
 
 CRITICAL RULES:
 1. ONLY modify code related to the security issue
@@ -90,7 +100,8 @@ You must respond with a JSON object containing:
   "changes_summary": ["List of specific changes made"]
 }`;
 
-    const userPrompt = `
+      const fullPrompt = `${systemInstructions}
+
 SECURITY ISSUE:
 - Severity: ${issue.severity}
 - Category: ${issue.category}
@@ -122,72 +133,81 @@ ${issue.codeSnippet}
 
 Please analyze this security issue and provide a complete, production-ready fix for the entire file.`;
 
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': claudeApiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 8000,
-        system: systemPrompt,
-        messages: [
-          {
-            role: 'user',
-            content: userPrompt,
-          },
-        ],
-      }),
-    });
+      console.log('Calling Claude API with model: claude-sonnet-4-5');
+      console.log('API Key present:', !!apiKey);
+      console.log('API Key prefix:', apiKey ? apiKey.substring(0, 15) + '...' : 'none');
 
-    if (!claudeResponse.ok) {
-      const errorData = await claudeResponse.text();
-      console.error('Claude API error:', errorData);
-      throw new Error(`Claude API error: ${claudeResponse.statusText}`);
-    }
+      const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 8000,
+          messages: [
+            {
+              role: 'user',
+              content: fullPrompt,
+            },
+          ],
+        }),
+      });
 
-    const claudeData = await claudeResponse.json();
-    const assistantMessage = claudeData.content[0].text;
-
-    let fixData: ClaudeResponse;
-    try {
-      const jsonMatch = assistantMessage.match(/```json\n([\s\S]*?)\n```/) ||
-                       assistantMessage.match(/```\n([\s\S]*?)\n```/) ||
-                       assistantMessage.match(/(\{[\s\S]*\})/);
-
-      if (jsonMatch) {
-        fixData = JSON.parse(jsonMatch[1]);
-      } else {
-        fixData = JSON.parse(assistantMessage);
+      if (!claudeResponse.ok) {
+        const errorData = await claudeResponse.text();
+        console.error('Claude API error response:', {
+          status: claudeResponse.status,
+          statusText: claudeResponse.statusText,
+          body: errorData,
+          headers: Object.fromEntries(claudeResponse.headers.entries())
+        });
+        throw new Error(`Claude API error: ${claudeResponse.status} ${claudeResponse.statusText} - ${errorData}`);
       }
-    } catch (parseError) {
-      console.error('Failed to parse Claude response:', assistantMessage);
-      throw new Error('Failed to parse AI response. Please try again.');
-    }
 
-    if (!fixData.fixed_content || !fixData.explanation) {
-      throw new Error('Invalid fix data from AI');
-    }
+      const claudeData = await claudeResponse.json();
+      const assistantMessage = claudeData.content[0].text;
 
-    res.json({
-      success: true,
-      fix: {
-        original_content: fileContent,
-        fixed_content: fixData.fixed_content,
-        explanation: fixData.explanation,
-        confidence: fixData.confidence || 0.8,
-        changes_summary: fixData.changes_summary || [],
-        issue_id: issue.id,
-        file_path: issue.filePath,
-      },
-    });
-  } catch (error: any) {
-    console.error('Fix generation error:', error);
-    res.status(500).json({
-      error: error.message || 'Failed to generate fix',
-      details: error.stack
-    });
+      let fixData: ClaudeResponse;
+      try {
+        const jsonMatch = assistantMessage.match(/```json\n([\s\S]*?)\n```/) ||
+                         assistantMessage.match(/```\n([\s\S]*?)\n```/) ||
+                         assistantMessage.match(/(\{[\s\S]*\})/);
+
+        if (jsonMatch) {
+          fixData = JSON.parse(jsonMatch[1]);
+        } else {
+          fixData = JSON.parse(assistantMessage);
+        }
+      } catch (parseError) {
+        console.error('Failed to parse Claude response:', assistantMessage);
+        throw new Error('Failed to parse AI response. Please try again.');
+      }
+
+      if (!fixData.fixed_content || !fixData.explanation) {
+        throw new Error('Invalid fix data from AI');
+      }
+
+      res.json({
+        success: true,
+        fix: {
+          original_content: fileContent,
+          fixed_content: fixData.fixed_content,
+          explanation: fixData.explanation,
+          confidence: fixData.confidence || 0.8,
+          changes_summary: fixData.changes_summary || [],
+          issue_id: issue.id,
+          file_path: issue.filePath,
+        },
+      });
+    } catch (error: any) {
+      console.error('Fix generation error:', error);
+      res.status(500).json({
+        error: error.message || 'Failed to generate fix',
+        details: error.stack
+      });
+    }
   }
-});
+);

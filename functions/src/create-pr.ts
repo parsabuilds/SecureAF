@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { onRequest } from 'firebase-functions/v2/https';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,7 +25,7 @@ interface CreatePRRequest {
   };
 }
 
-export const createPr = functions.https.onRequest(async (req, res) => {
+export const createPr = onRequest({ cors: true }, async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.set(corsHeaders);
     res.status(200).send();
