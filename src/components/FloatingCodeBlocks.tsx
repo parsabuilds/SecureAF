@@ -26,7 +26,7 @@ const vulnerabilities = [
     vulnerability: 'Code Injection',
   },
   {
-    code: 'password = "admin123"',
+    code: 'password = process.env.DB_PASSWORD',
     vulnerability: 'Hardcoded Password',
   },
 ];
