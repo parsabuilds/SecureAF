@@ -83,7 +83,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full text-blue-700 font-medium text-sm mb-8 animate-fade-in">
               <Zap className="w-4 h-4" />
-              Security Analysis for Everyone
+              Because your code deserves better.
             </div>
 
             <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent leading-tight">
@@ -167,7 +167,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
 
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mt-20">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">
-                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center mb-4 shadow-lg mx-auto">
                   <Lock className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-gray-900">
@@ -179,7 +179,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               </div>
 
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mb-4 shadow-lg mx-auto">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-gray-900">
@@ -191,7 +191,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               </div>
 
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-4 shadow-lg mx-auto">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-gray-900">
