@@ -92,10 +92,6 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               with confidence
             </h1>
 
-            <p className="text-2xl text-gray-700 mb-3 font-medium">
-              Because your code deserves better.
-            </p>
-
             <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
               Professional security analysis for your GitHub repositories.
               Catch vulnerabilities before they reach production.
