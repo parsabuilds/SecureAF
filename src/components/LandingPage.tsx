@@ -12,21 +12,9 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
   const [repoUrl, setRepoUrl] = useState('');
   const [isHovered, setIsHovered] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(githubService.isAuthenticated());
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     setIsAuthenticated(githubService.isAuthenticated());
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 2;
-      const y = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMousePosition({ x, y });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -49,31 +37,9 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
       <ParticleAnimation />
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transition-transform duration-300 ease-out"
-          style={{
-            transform: `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`
-          }}
-        />
-        <div
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-indigo-100/30 to-transparent rounded-full blur-3xl transition-transform duration-500 ease-out"
-          style={{
-            transform: `translate(${mousePosition.x * -20}px, ${mousePosition.y * -20}px)`
-          }}
-        />
-        <div
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-100/20 to-transparent rounded-full blur-2xl transition-transform duration-700 ease-out"
-          style={{
-            transform: `translate(${mousePosition.x * 50}px, ${mousePosition.y * 50}px)`
-          }}
-        />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-tl from-purple-100/20 to-transparent rounded-full blur-2xl transition-transform duration-700 ease-out"
-          style={{
-            transform: `translate(${mousePosition.x * -40}px, ${mousePosition.y * -40}px)`
-          }}
-        />
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-indigo-100/30 to-transparent rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
       <div className="relative z-10">
@@ -114,12 +80,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
         </nav>
 
         <main className="container mx-auto px-6 py-20">
-          <div
-            className="max-w-4xl mx-auto text-center transition-transform duration-300 ease-out"
-            style={{
-              transform: `translate(${mousePosition.x * 5}px, ${mousePosition.y * 5}px)`
-            }}
-          >
+          <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full text-blue-700 font-medium text-sm mb-8 animate-fade-in">
               <Zap className="w-4 h-4" />
               Because your code deserves better.
@@ -130,6 +91,10 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               <br />
               with confidence
             </h1>
+
+            <p className="text-2xl text-gray-700 mb-3 font-medium">
+              Because your code deserves better.
+            </p>
 
             <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
               Professional security analysis for your GitHub repositories.
@@ -201,12 +166,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
             )}
 
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mt-20">
-              <div
-                className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl"
-                style={{
-                  transform: `translate(${mousePosition.x * 8}px, ${mousePosition.y * 8}px)`
-                }}
-              >
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center mb-4 shadow-lg mx-auto">
                   <Lock className="w-6 h-6 text-white" />
                 </div>
@@ -218,12 +178,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
                 </p>
               </div>
 
-              <div
-                className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl"
-                style={{
-                  transform: `translate(${mousePosition.x * 6}px, ${mousePosition.y * 6}px)`
-                }}
-              >
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mb-4 shadow-lg mx-auto">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
@@ -235,12 +190,7 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
                 </p>
               </div>
 
-              <div
-                className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl"
-                style={{
-                  transform: `translate(${mousePosition.x * 10}px, ${mousePosition.y * 10}px)`
-                }}
-              >
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-4 shadow-lg mx-auto">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
