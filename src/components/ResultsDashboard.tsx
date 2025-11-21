@@ -109,22 +109,30 @@ export function ResultsDashboard({ result, onBack }: ResultsDashboardProps) {
               <p className="text-sm text-gray-500">{result.repoOwner}</p>
             </div>
           </div>
-          <button
-            onClick={() => {
-              const criticalOrHighIssues = result.issues.filter(
-                (i) => (i.severity === 'critical' || i.severity === 'high') && i.filePath
-              );
-              if (criticalOrHighIssues.length > 0) {
-                setSelectedIssue(criticalOrHighIssues[0]);
-                setPrModalOpen(true);
-              }
-            }}
-            disabled={!result.issues.some((i) => (i.severity === 'critical' || i.severity === 'high') && i.filePath)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-blue-600 disabled:hover:to-indigo-600"
-          >
-            <Sparkles className="w-4 h-4" />
-            Generate Fix PR
-          </button>
+          <div className="relative group">
+            <button
+              onClick={() => {
+                const criticalOrHighIssues = result.issues.filter(
+                  (i) => (i.severity === 'critical' || i.severity === 'high') && i.filePath
+                );
+                if (criticalOrHighIssues.length > 0) {
+                  setSelectedIssue(criticalOrHighIssues[0]);
+                  setPrModalOpen(true);
+                }
+              }}
+              disabled={!result.issues.some((i) => (i.severity === 'critical' || i.severity === 'high') && i.filePath)}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-blue-600 disabled:hover:to-indigo-600"
+            >
+              <Sparkles className="w-4 h-4" />
+              Generate Fix PR
+            </button>
+            {!result.issues.some((i) => (i.severity === 'critical' || i.severity === 'high') && i.filePath) && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl">
+                No critical or high severity issues to fix
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

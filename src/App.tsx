@@ -63,11 +63,15 @@ function App() {
         setState('results');
       }, 9000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Analysis failed');
+      const errorMessage = err instanceof Error ? err.message : 'Analysis failed';
+      setError(errorMessage);
       setState('error');
-      setTimeout(() => {
-        setState('landing');
-      }, 3000);
+
+      if (!errorMessage.startsWith('PRIVATE_REPO:')) {
+        setTimeout(() => {
+          setState('landing');
+        }, 3000);
+      }
     }
   }, []);
 
