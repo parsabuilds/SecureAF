@@ -138,56 +138,14 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
               </div>
             )}
 
-            <div className="relative mb-8">
-              <svg
-                className="absolute pointer-events-none overflow-visible"
-                style={{
-                  left: '50%',
-                  top: '0',
-                  transform: 'translateX(-50%)',
-                  width: '100vw',
-                  height: '100vh',
-                  zIndex: 0
-                }}
-                viewBox="0 0 1920 1080"
-                preserveAspectRatio="xMidYMid slice"
-              >
-                <defs>
-                  <linearGradient id="arcGradientLeft" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="rgba(59, 130, 246, 0)" />
-                    <stop offset="80%" stopColor="rgba(59, 130, 246, 0.4)" />
-                    <stop offset="100%" stopColor="rgba(99, 102, 241, 0.5)" />
-                  </linearGradient>
-                  <linearGradient id="arcGradientRight" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="rgba(99, 102, 241, 0.5)" />
-                    <stop offset="20%" stopColor="rgba(59, 130, 246, 0.4)" />
-                    <stop offset="100%" stopColor="rgba(59, 130, 246, 0)" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M 0,200 Q 480,0 960,200"
-                  fill="none"
-                  stroke="url(#arcGradientLeft)"
-                  strokeWidth="3"
-                  opacity="0.8"
+            <form onSubmit={handleSubmit} className="mb-8">
+              <div className="relative max-w-3xl mx-auto">
+                <div
+                  className={`absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur-lg transition-opacity duration-300 ${
+                    isHovered ? 'opacity-30' : 'opacity-0'
+                  }`}
                 />
-                <path
-                  d="M 960,200 Q 1440,0 1920,200"
-                  fill="none"
-                  stroke="url(#arcGradientRight)"
-                  strokeWidth="3"
-                  opacity="0.8"
-                />
-              </svg>
-
-              <form onSubmit={handleSubmit}>
-                <div className="relative max-w-3xl mx-auto" style={{ zIndex: 10 }}>
-                  <div
-                    className={`absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur-lg transition-opacity duration-300 ${
-                      isHovered ? 'opacity-30' : 'opacity-0'
-                    }`}
-                  />
-                  <div className="relative flex items-center bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+                <div className="relative flex items-center bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
                   <Github className="w-6 h-6 text-gray-400 ml-6" />
                   <input
                     type="text"
@@ -198,16 +156,15 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
                     placeholder={isAuthenticated ? "Enter any GitHub repository URL" : "Enter public GitHub repository URL"}
                     className="flex-1 px-6 py-6 text-lg outline-none"
                   />
-                    <button
-                      type="submit"
-                      className="m-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      Analyze
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    className="m-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Analyze
+                  </button>
                 </div>
-              </form>
-            </div>
+              </div>
+            </form>
 
             {isAuthenticated && (
               <div className="flex items-center justify-center gap-4 mb-8">

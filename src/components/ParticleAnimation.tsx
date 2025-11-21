@@ -37,7 +37,7 @@ export function ParticleAnimation() {
       vx: (Math.random() - 0.5) * 0.3,
       vy: (Math.random() - 0.5) * 0.3,
       radius: Math.random() * 2.5 + 1,
-      opacity: Math.random() * 0.3 + 0.1,
+      opacity: Math.random() * 0.15 + 0.05,
     }));
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -87,8 +87,8 @@ export function ParticleAnimation() {
         ctx.fillStyle = `rgba(96, 165, 250, ${particle.opacity})`;
         ctx.fill();
 
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = 'rgba(59, 130, 246, 0.5)';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(59, 130, 246, 0.3)';
         ctx.fill();
         ctx.shadowBlur = 0;
       });
@@ -100,7 +100,7 @@ export function ParticleAnimation() {
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance < 150) {
-            const opacity = 0.15 * (1 - distance / 150);
+            const opacity = 0.08 * (1 - distance / 150);
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
