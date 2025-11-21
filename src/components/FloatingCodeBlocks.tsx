@@ -31,7 +31,11 @@ const vulnerabilities = [
   },
 ];
 
-export function FloatingCodeBlocks() {
+interface FloatingCodeBlocksProps {
+  mousePosition: { x: number; y: number };
+}
+
+export function FloatingCodeBlocks({ mousePosition }: FloatingCodeBlocksProps) {
   const [blocks, setBlocks] = useState<CodeBlock[]>([]);
 
   useEffect(() => {
@@ -77,24 +81,30 @@ export function FloatingCodeBlocks() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {blocks.map((block) => (
-        <div
-          key={block.id}
-          className="absolute animate-float opacity-0"
-          style={{
-            left: `${block.x}%`,
-            top: `${block.y}%`,
-            animationDelay: `${block.delay}s`,
-            animationDuration: `${block.duration}s`,
-          }}
-        >
+      {blocks.map((block, index) => {
+        const isLeft = index < 2;
+        const moveMultiplier = isLeft ? 15 : -15;
+
+        return (
           <div
-            className={`relative bg-white/40 backdrop-blur-sm rounded-lg shadow-xl border-2 transition-all duration-500 ${
-              block.fixed
-                ? 'border-green-300 scale-105'
-                : 'border-red-300'
-            }`}
+            key={block.id}
+            className="absolute animate-float opacity-0"
+            style={{
+              left: `${block.x}%`,
+              top: `${block.y}%`,
+              animationDelay: `${block.delay}s`,
+              animationDuration: `${block.duration}s`,
+              transform: `translate(${mousePosition.x * moveMultiplier}px, ${mousePosition.y * moveMultiplier}px)`,
+              transition: 'transform 0.3s ease-out',
+            }}
           >
+            <div
+              className={`relative bg-white/40 backdrop-blur-sm rounded-lg shadow-xl border-2 transition-all duration-500 ${
+                block.fixed
+                  ? 'border-green-300 scale-105'
+                  : 'border-red-300'
+              }`}
+            >
             <div className="absolute -top-3 -right-3 z-10">
               {block.fixed ? (
                 <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-scale-in">
@@ -135,7 +145,8 @@ export function FloatingCodeBlocks() {
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
