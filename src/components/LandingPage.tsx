@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, Github, Lock, Zap, CheckCircle } from 'lucide-react';
 import { ParticleAnimation } from './ParticleAnimation';
-import { FloatingCodeBlocks } from './FloatingCodeBlocks';
 import { RepositorySelector } from './RepositorySelector';
 import { githubService } from '../services/githubService';
 
@@ -50,7 +49,6 @@ export function LandingPage({ onAnalyze }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
       <ParticleAnimation />
-      <FloatingCodeBlocks />
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transition-transform duration-300 ease-out"
