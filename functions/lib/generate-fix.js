@@ -96,7 +96,7 @@ ${issue.codeSnippet}
 ` : ''}
 
 Please analyze this security issue and provide a complete, production-ready fix for the entire file.`;
-        console.log('Calling Claude API with model: claude-3-sonnet-20240229');
+        console.log('Calling Claude API with model: claude-sonnet-4-20250514');
         console.log('API Key present:', !!apiKey);
         console.log('API Key prefix:', apiKey ? apiKey.substring(0, 15) + '...' : 'none');
         const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
@@ -107,8 +107,8 @@ Please analyze this security issue and provide a complete, production-ready fix 
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-3-sonnet-20240229',
-                max_tokens: 4096,
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 8000,
                 messages: [
                     {
                         role: 'user',
